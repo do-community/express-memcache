@@ -1,5 +1,6 @@
 const express = require('express');
 const findPrime = require('./utils/findPrime');
+const memcache = require('./services/memcache');
 
 const app = express();
 
@@ -20,6 +21,12 @@ app.get('/', (req, res) => {
   }
   
   const prime = findPrime(n);
+
+  const key = 'prime_' + n;
+
+  memcache.set(key, prime.toString(), { expires: 0 }, (err) => {
+    if (err) console.log(err);
+  });
 
   // Initialize likes for this number when necessary
   if (!likesMap[n]) likesMap[n] = 0;
