@@ -15,12 +15,12 @@ const likesMap = {};
 
 app.get('/', cacheView, (req, res) => {
   const n = req.query.n;
-  
+
   if (!n) {
     res.render('index');
     return;
   }
-  
+
   let prime;
 
   const key = 'prime_' + n;
@@ -59,7 +59,16 @@ app.get('/like', (req, res) => {
 
   likesMap[n]++;
 
-  res.redirect(`/?n=${n}`);
+  // The URL of the page being 'liked'
+  const url = `/?n=${n}`;
+
+  // The view for this URL has changed, so the cached version is no longer valid, delete it from the cache.
+  const key = `view_${url}`;
+  memcache.delete(key, (err) => {
+    if (err) console.log(err);
+  });
+
+  res.redirect(url);
 });
 
 const port = process.env.PORT || 3000;
