@@ -20,19 +20,32 @@ app.get('/', (req, res) => {
     return;
   }
   
-  const prime = findPrime(n);
+  let prime;
 
   const key = 'prime_' + n;
 
-  memcache.set(key, prime.toString(), { expires: 0 }, (err) => {
+  memcache.get(key, (err, val) => {
     if (err) console.log(err);
+
+    if (val !== null) {
+      // Use the value from the cache
+      // Convert Buffer string before converting to number
+      prime = parseInt(val.toString());
+    } else {
+      // No cached value available, find it
+      prime = findPrime(n);
+
+      memcache.set(key, prime.toString(), { expires: 0 }, (err) => {
+        if (err) console.log(err);
+      });
+    }
+
+    // Initialize likes for this number when necessary
+    if (!likesMap[n]) likesMap[n] = 0;
+
+    const locals = { n, prime, likes: likesMap[n] };
+    res.render('index', locals);
   });
-
-  // Initialize likes for this number when necessary
-  if (!likesMap[n]) likesMap[n] = 0;
-
-  const locals = { n, prime, likes: likesMap[n] };
-  res.render('index', locals);
 });
 
 app.get('/like', (req, res) => {
