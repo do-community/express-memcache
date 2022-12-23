@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Find the largest prime number</title>
+  </head>
+  <body>
+    <h1>Find the largest prime number</h1>
+
+    <p>
+      For any number N, find the largest prime number less than or equal to N.
+    </p>
+
+    <form action="/" method="get">
+      <label>
+        N
+        <input type="number" name="n" placeholder="e.g. 10" required>
+      </label>
+      <button>Find Prime</button>
+    </form>
+
+    <% if (locals.n && locals.prime) { %>
+      <p>
+        The largest prime number less than or equal to <%= n %> is <strong><%= prime %></strong>.
+      </p>
+      <form action="/like" method="get">
+        <input type="hidden" name="n" value="<%= n %>">
+        <input type="submit" value="Like"> <%= likes %>
+      </form>
+    <% } %>
+  </body>
+</html>
