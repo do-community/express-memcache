@@ -1,6 +1,7 @@
 const express = require('express');
 const findPrime = require('./utils/findPrime');
 const memcache = require('./services/memcache');
+const cacheView = require('./middleware/cacheView');
 
 const app = express();
 
@@ -12,7 +13,7 @@ app.set('view engine', 'ejs');
  */
 const likesMap = {};
 
-app.get('/', (req, res) => {
+app.get('/', cacheView, (req, res) => {
   const n = req.query.n;
   
   if (!n) {
