@@ -2,10 +2,42 @@ const express = require('express');
 const findPrime = require('./utils/findPrime');
 const memcache = require('./services/memcache');
 const cacheView = require('./middleware/cacheView');
+const session = require('express-session');
+const MemcacheStore = require('connect-memjs')(session);
 
 const app = express();
 
 app.set('view engine', 'ejs');
+
+app.use(
+  session({
+    secret: 'your-session-secret',
+    resave: false,
+    saveUninitialized: true,
+    store: new MemcacheStore({
+      servers: [process.env.MEMCACHIER_SERVERS],
+      prefix: 'session_',
+    }),
+  })
+);
+
+/**
+ * Session sanity check middleware
+ */
+app.use(function (req, res, next) {
+  console.log('Session ID:', req.session.id);
+
+  // Get the item from the cache
+  memcache.get(`session_${req.session.id}`, (err, val) => {
+    if (err) console.log(err);
+
+    if (val !== null) {
+      console.log('Session from cache:', val.toString());
+    }
+  });
+
+  next();
+});
 
 /**
  * Key is `n`
